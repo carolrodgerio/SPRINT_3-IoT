@@ -1,0 +1,165 @@
+[
+    {
+        "id": "b6ed878129e0a2cf",
+        "type": "tab",
+        "label": "Fluxo Motthru",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "e0e5c9a1.0e1768",
+        "type": "mqtt in",
+        "z": "b6ed878129e0a2cf",
+        "name": "Recebe Telemetria Motos",
+        "topic": "motthru/telemetria",
+        "qos": "2",
+        "datatype": "auto",
+        "broker": "c2463e26.b68e9",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 260,
+        "y": 240,
+        "wires": [
+            [
+                "b22c83d.240c58"
+            ]
+        ]
+    },
+    {
+        "id": "b22c83d.240c58",
+        "type": "json",
+        "z": "b6ed878129e0a2cf",
+        "name": "Converte para JSON",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 500,
+        "y": 240,
+        "wires": [
+            [
+                "f4c6e94e.009778",
+                "45f95de2.695374"
+            ]
+        ]
+    },
+    {
+        "id": "f4c6e94e.009778",
+        "type": "function",
+        "z": "b6ed878129e0a2cf",
+        "name": "Prepara Dados p/ Dashboard",
+        "func": "// Adiciona um timestamp legível\nconst data = new Date().toLocaleString(\"pt-BR\");\n\n// Extrai os dados do payload\nconst id = msg.payload.id_moto;\nconst local = msg.payload.localizacao;\nconst temp = msg.payload.temperatura;\nconst umid = msg.payload.umidade;\n\n// Formata a string de saída\nmsg.payload = `Última Detecção: ${data} | Local: ${local} | Temp: ${temp.toFixed(1)}°C | Umid: ${umid.toFixed(1)}%`;\n\n// Define o tópico para direcionar ao widget certo no dashboard\nmsg.topic = id; \n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 750,
+        "y": 180,
+        "wires": [
+            [
+                "c6b986c7.ab2d18"
+            ]
+        ]
+    },
+    {
+        "id": "c6b986c7.ab2d18",
+        "type": "ui_text",
+        "z": "b6ed878129e0a2cf",
+        "group": "b8e23977.72c3b8",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "{{msg.topic}}",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 990,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "45f95de2.695374",
+        "type": "function",
+        "z": "b6ed878129e0a2cf",
+        "name": "Prepara Linha CSV",
+        "func": "// Adiciona um timestamp para o log\nconst timestamp = new Date().toISOString();\n\n// Extrai os dados\nconst id = msg.payload.id_moto;\nconst local = msg.payload.localizacao;\nconst temp = msg.payload.temperatura;\nconst umid = msg.payload.umidade;\nconst status = msg.payload.status;\n\n// Formata a linha para o arquivo CSV, adicionando uma quebra de linha no final\nmsg.payload = `${timestamp},${id},${local},${status},${temp},${umid}\\n`;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 740,
+        "y": 300,
+        "wires": [
+            [
+                "9b1b7a2d.b2b4f8"
+            ]
+        ]
+    },
+    {
+        "id": "9b1b7a2d.b2b4f8",
+        "type": "file",
+        "z": "b6ed878129e0a2cf",
+        "name": "Salva em historico.csv",
+        "filename": "C:\\Users\\carol\\Downloads\\NODE-RED\\historico.csv",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "false",
+        "encoding": "none",
+        "x": 970,
+        "y": 300,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c2463e26.b68e9",
+        "type": "mqtt-broker",
+        "name": "HiveMQ Public",
+        "broker": "broker.hivemq.com",
+        "port": "1883",
+        "clientid": "",
+        "usetls": false,
+        "compatmode": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "sessionExpiry": ""
+    },
+    {
+        "id": "b8e23977.72c3b8",
+        "type": "ui_group",
+        "name": "Status das Motos",
+        "tab": "a92f8016.92055",
+        "order": 1,
+        "disp": true,
+        "width": "12",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "a92f8016.92055",
+        "type": "ui_tab",
+        "name": "Dashboard Motthru",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
